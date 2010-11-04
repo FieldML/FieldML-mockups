@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fieldml version="0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Fieldml.xsd">
+ <Region name="heart">
+
+  <EnsembleType name="heart.nodes.type">
+   <bounds>
+    <ContiguousEnsembleBounds valueCount="633" />
+   </bounds>
+  </EnsembleType>
+
+
+  <VirtualEvaluator name="heart.nodes.variable" valueType="heart.nodes.type" />
+
+
+  <MeshType name="heart.mesh.type">
+   <xi dimensions="2"/>
+   <elements>
+    <bounds>
+     <ContiguousEnsembleBounds valueCount="60"/>
+    </bounds>
+   </elements>
+   <shapes default="library.shape.cube" />
+  </MeshType>
+
+  
+  <VirtualEvaluator name="heart.mesh.variable" valueType="heart.mesh.type" />
+
+
+  <EnsembleParameters name="heart.cube3x3x3_nodes" valueType="heart.nodes.type">
+   <variables>
+     <variable name="library.nodes.cube3x3x3.variable" />
+     <variable name="heart.mesh.variable" />
+   </variables>
+   <SemidenseData>
+    <denseIndexes>
+     <entry value="library.nodes.cube3x3x3.variable" />
+     <entry value="heart.mesh.variable" />
+    </denseIndexes>
+    <dataLocation>
+     <fileData file="heart.connectivity" type="lines" offset="0" />
+    </dataLocation>
+   </SemidenseData>
+  </EnsembleParameters>
+
+
+  <VirtualEvaluator name="heart.nodal_dofs" valueType="library.real.1d">
+   <variables>
+     <variable name="heart.nodes.variable" />
+   </variables>
+  </VirtualEvaluator>
+  
+  
+  <ContinuousReferenceEvaluator name="heart.element_params.triquadratic_lagrange" evaluator="heart.nodal_dofs" 
+      valueType="library.parameters.triquadratic_lagrange.type">
+   <variables>
+     <variable name="heart.mesh.variable" />
+     <variable name="heart.nodal_dofs" />
+   </variables>
+   <binds>
+     <bind variable="heart.nodes.variable" source="heart.cube3x3x3_nodes"/>
+   </binds>
+  </ContinuousReferenceEvaluator>
+
+
+  <ContinuousReferenceEvaluator name="heart.triquadratic_lagrange" evaluator="library.fem.triquadratic_lagrange"
+      valueType="library.real.1d">
+   <variables>
+     <variable name="heart.mesh.variable" />
+     <variable name="heart.nodal_dofs" />
+   </variables>
+   <binds>
+    <bind variable="library.fem.triquadratic_lagrange.parameters" source="heart.element_params.triquadratic_lagrange" />
+    <bind variable="library.fem.xi" source="heart.mesh.variable.xi" />
+   </binds>
+  </ContinuousReferenceEvaluator>
+
+
+  <ContinuousPiecewiseEvaluator name="heart.template.triquadratic"
+      valueDescription="library.real.1d">
+   <variables>
+     <variable name="heart.mesh.variable" />
+     <variable name="heart.nodal_dofs" />
+   </variables>
+   <binds>
+     <bind_index variable="heart.mesh.variable.element" index_number="1" />
+   </binds>
+   <elementEvaluators default="heart.triquadratic_lagrange" />
+  </ContinuousPiecewiseEvaluator>
+
+
+  <VirtualEvaluator name="heart.rc3.component" valueType="library.coordinates.rc.3d.components" />
+
+  <ContinuousParameters name="heart.node.coordinates" valueType="library.real.1d">
+   <variables>
+     <variable name="heart.rc3.component" />
+     <variable name="heart.nodes.variable" />
+   </variables>
+   <SemidenseData>
+    <denseIndexes>
+     <entry value="heart.rc3.component" />
+     <entry value="heart.nodes.variable" />
+    </denseIndexes>
+    <dataLocation>
+     <fileData file="heart.node.coordinates" type="lines" offset="0" />
+    </dataLocation>
+   </SemidenseData>
+  </ContinuousParameters>
+
+
+  <VirtualEvaluator name="heart.nodal_component_dofs" valueType="library.real.1d">
+   <variables>
+     <variable name="heart.rc3.component" />
+     <variable name="heart.nodes.variable" />
+   </variables>
+  </VirtualEvaluator>
+
+
+
+  <ContinuousAggregateEvaluator name="heart.coordinates" valueType="library.coordinates.rc.3d.description">
+   <variables>
+     <variable name="heart.mesh.variable" />
+     <variable name="heart.nodal_component_dofs" />
+   </variables>
+   <binds>
+     <bind_index variable="heart.rc3.component" index_number="1"/>
+     <bind variable="heart.nodal_dofs" source="heart.nodal_component_dofs"/>
+   </binds>
+   <sourceFields>
+    <component number="1" evaluator="heart.template.triquadratic" />
+    <component number="2" evaluator="heart.template.triquadratic" />
+    <component number="3" evaluator="heart.template.triquadratic" />
+   </sourceFields>
+  </ContinuousAggregateEvaluator>
+
+
+
+
+  <Domain name="heart.domain">
+    <atlas name="mesh1">
+      <component name="mesh" type="heart.mesh"/>
+    </atlas>
+  </Domain>
+  
+  <Domain name="heart.geometry">
+    <atlas name="coordinates">
+      <component name="rc3" type="library.coordinates.rc3"/>
+    </atlas>
+  </Domain>
+
+  <Field name="heart.coordinates" domain="heart.domain" valueAtlas="heart.geometry.rc3">
+    <evaluator name="heart.coordinates">
+      <!-- Can only bind to components of the current atlas -->
+      <binds>
+        <bind_evaluator variable="heart.mesh" source="mesh1.mesh" />
+        <bind_evaluator variable="heart.nodal_component_dofs" source="heart.node.coordinates"/>
+      </binds>
+    </evaluator>
+  </Field>
+
+  <Field name="heart.coordinates_times_2" domain="heart.domain" valueAtlas="heart.geometry.rc3">
+    <evaluator name="library.add">
+      <!-- Can only bind to components of the current atlas -->
+      <binds>
+        <bind_field variable="arg1" source="heart.coordinates"/>
+        <bind_field variable="arg2" source="heart.coordinates"/>
+      </binds>
+    </evaluator>
+  </Field>
+
+ </Region>
+</fieldml>
