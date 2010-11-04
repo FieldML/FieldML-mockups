@@ -59,7 +59,7 @@
      <bind_index variable="library.nodes.cube3x3x3.variable" index_number="1"/>
      <bind variable="heart.nodes.variable" source="heart.cube3x3x3_nodes"/>
    </binds>
-   <sourceFields default="heart.nodal_dofs" />
+   <sourceEvaluators default="heart.nodal_dofs" />
   </ContinuousAggregateEvaluator>
 
   
@@ -125,11 +125,11 @@
      <bind_index variable="heart.rc3.component" index_number="1"/>
      <bind variable="heart.nodal_dofs" source="heart.nodal_component_dofs"/>
    </binds>
-   <sourceFields>
+   <sourceEvaluators>
     <component number="1" evaluator="heart.template.triquadratic" />
     <component number="2" evaluator="heart.template.triquadratic" />
     <component number="3" evaluator="heart.template.triquadratic" />
-   </sourceFields>
+   </sourceEvaluators>
   </ContinuousAggregateEvaluator>
 
 
