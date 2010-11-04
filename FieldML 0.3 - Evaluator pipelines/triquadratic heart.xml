@@ -9,7 +9,7 @@
   </EnsembleType>
 
 
-  <VirtualEvaluator name="heart.nodes.variable" valueType="heart.nodes.type" />
+  <AbstractEvaluator name="heart.nodes.variable" valueType="heart.nodes.type" />
 
 
   <MeshType name="heart.mesh.type">
@@ -23,7 +23,7 @@
   </MeshType>
 
   
-  <VirtualEvaluator name="heart.mesh.variable" valueType="heart.mesh.type" />
+  <AbstractEvaluator name="heart.mesh.variable" valueType="heart.mesh.type" />
 
 
   <EnsembleParameters name="heart.cube3x3x3_nodes" valueType="heart.nodes.type">
@@ -43,25 +43,26 @@
   </EnsembleParameters>
 
 
-  <VirtualEvaluator name="heart.nodal_dofs" valueType="library.real.1d">
+  <AbstractEvaluator name="heart.nodal_dofs" valueType="library.real.1d">
    <variables>
      <variable name="heart.nodes.variable" />
    </variables>
-  </VirtualEvaluator>
+  </AbstractEvaluator>
   
-  
-  <ContinuousReferenceEvaluator name="heart.element_params.triquadratic_lagrange" evaluator="heart.nodal_dofs" 
-      valueType="library.parameters.triquadratic_lagrange.type">
+
+  <ContinuousAggregateEvaluator name="heart.element_params.triquadratic_lagrange" valueType="library.parameters.triquadratic_lagrange.type">
    <variables>
      <variable name="heart.mesh.variable" />
      <variable name="heart.nodal_dofs" />
    </variables>
    <binds>
+     <bind_index variable="library.nodes.cube3x3x3.variable" index_number="1"/>
      <bind variable="heart.nodes.variable" source="heart.cube3x3x3_nodes"/>
    </binds>
-  </ContinuousReferenceEvaluator>
+   <sourceFields default="heart.nodal_dofs" />
+  </ContinuousAggregateEvaluator>
 
-
+  
   <ContinuousReferenceEvaluator name="heart.triquadratic_lagrange" evaluator="library.fem.triquadratic_lagrange"
       valueType="library.real.1d">
    <variables>
@@ -88,7 +89,7 @@
   </ContinuousPiecewiseEvaluator>
 
 
-  <VirtualEvaluator name="heart.rc3.component" valueType="library.coordinates.rc.3d.components" />
+  <AbstractEvaluator name="heart.rc3.component" valueType="library.coordinates.rc.3d.components" />
 
   <ContinuousParameters name="heart.node.coordinates" valueType="library.real.1d">
    <variables>
@@ -107,13 +108,12 @@
   </ContinuousParameters>
 
 
-  <VirtualEvaluator name="heart.nodal_component_dofs" valueType="library.real.1d">
+  <AbstractEvaluator name="heart.nodal_component_dofs" valueType="library.real.1d">
    <variables>
      <variable name="heart.rc3.component" />
      <variable name="heart.nodes.variable" />
    </variables>
-  </VirtualEvaluator>
-
+  </AbstractEvaluator>
 
 
   <ContinuousAggregateEvaluator name="heart.coordinates" valueType="library.coordinates.rc.3d.description">
@@ -131,7 +131,6 @@
     <component number="3" evaluator="heart.template.triquadratic" />
    </sourceFields>
   </ContinuousAggregateEvaluator>
-
 
 
 
