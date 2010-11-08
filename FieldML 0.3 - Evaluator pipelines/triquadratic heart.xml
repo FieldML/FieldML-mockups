@@ -34,7 +34,7 @@
    <SemidenseData>
     <denseIndexes>
      <entry value="library.nodes.cube3x3x3.variable" />
-     <entry value="heart.mesh.variable" />
+     <entry value="heart.mesh.variable.element" />
     </denseIndexes>
     <dataLocation>
      <fileData file="heart.connectivity" type="lines" offset="0" />
@@ -116,7 +116,7 @@
   </AbstractEvaluator>
 
 
-  <ContinuousAggregateEvaluator name="heart.coordinates" valueType="library.coordinates.rc.3d.description">
+  <ContinuousAggregateEvaluator name="heart.coordinates.template" valueType="library.coordinates.rc.3d.description">
    <variables>
      <variable name="heart.mesh.variable" />
      <variable name="heart.nodal_component_dofs" />
