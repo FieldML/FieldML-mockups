@@ -107,6 +107,36 @@
    </SemidenseData>
   </ContinuousParameters>
 
+  <ContinuousParameters name="heart.node.velocity" valueType="library.real.1d">
+   <variables>
+     <variable name="heart.rc3.component" />
+     <variable name="heart.nodes.variable" />
+   </variables>
+   <SemidenseData>
+    <denseIndexes>
+     <entry value="heart.rc3.component" />
+     <entry value="heart.nodes.variable" />
+    </denseIndexes>
+    <dataLocation>
+     <fileData file="heart.node.velocity" type="lines" offset="0" />
+    </dataLocation>
+   </SemidenseData>
+  </ContinuousParameters>
+
+  <ContinuousParameters name="heart.node.pressure" valueType="library.real.1d">
+   <variables>
+     <variable name="heart.nodes.variable" />
+   </variables>
+   <SemidenseData>
+    <denseIndexes>
+     <entry value="heart.nodes.variable" />
+    </denseIndexes>
+    <dataLocation>
+     <fileData file="heart.node.pressure" type="lines" offset="0" />
+    </dataLocation>
+   </SemidenseData>
+  </ContinuousParameters>
+
 
   <AbstractEvaluator name="heart.nodal_component_dofs" valueType="library.real.1d">
    <variables>
@@ -116,7 +146,7 @@
   </AbstractEvaluator>
 
 
-  <ContinuousAggregateEvaluator name="heart.coordinates.template" valueType="library.coordinates.rc.3d.description">
+  <ContinuousAggregateEvaluator name="heart.vector.template" valueType="library.coordinates.rc.3d.description">
    <variables>
      <variable name="heart.mesh.variable" />
      <variable name="heart.nodal_component_dofs" />
@@ -145,9 +175,21 @@
       <component name="rc3" type="library.coordinates.rc3"/>
     </atlas>
   </Domain>
+  
+  <Domain name="heart.velocity">
+    <atlas name="velocity">
+      <component name="v" type="library.real.3d"/>
+    </atlas>
+  </Domain>
+  
+  <Domain name="heart.pressure">
+    <atlas name="pressure">
+      <component name="p" type="library.real.1d"/>
+    </atlas>
+  </Domain>
 
-  <Field name="heart.coordinates" domain="heart.domain" valueAtlas="heart.geometry.rc3">
-    <evaluator name="heart.coordinates.template">
+  <Field name="heart.coordinates" domain="heart.domain" valueAtlas="heart.geometry.coordinates.rc3">
+    <evaluator name="heart.vector.template">
       <!-- Can only bind to components of the current atlas -->
       <binds>
         <bind_evaluator variable="heart.mesh" source="mesh1.mesh" />
@@ -156,12 +198,20 @@
     </evaluator>
   </Field>
 
-  <Field name="heart.coordinates_times_2" domain="heart.domain" valueAtlas="heart.geometry.rc3">
-    <evaluator name="library.add">
-      <!-- Can only bind to components of the current atlas -->
+  <Field name="heart.fluid_velocity" domain="heart.domain" valueAtlas="heart.velocity.velocity.v">
+    <evaluator name="heart.vector.template">
       <binds>
-        <bind_field variable="arg1" source="heart.coordinates"/>
-        <bind_field variable="arg2" source="heart.coordinates"/>
+        <bind_evaluator variable="heart.mesh" source="mesh1.mesh" />
+        <bind_evaluator variable="heart.nodal_component_dofs" source="heart.node.velocity"/>
+      </binds>
+    </evaluator>
+  </Field>
+
+  <Field name="heart.fluid_pressure" domain="heart.domain" valueAtlas="heart.pressure.pressure.p">
+    <evaluator name="heart.template.triquadratic">
+      <binds>
+        <bind_evaluator variable="heart.mesh" source="mesh1.mesh" />
+        <bind_evaluator variable="heart.nodal_dofs" source="heart.node.pressure"/>
       </binds>
     </evaluator>
   </Field>
