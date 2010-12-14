@@ -11,7 +11,7 @@
 
   <AbstractEvaluator name="heart.nodes.variable" valueType="heart.nodes.type" />
 
-  <MeshType name="heart.mesh.type" xi_component="library.ensemble.xi.2d">
+  <MeshType name="heart.mesh.type" xi_component="library.ensemble.xi.3d">
    <bounds>
     <ContiguousEnsembleBounds valueCount="60"/>
    </bounds>
@@ -66,7 +66,7 @@
    </variables>
    <binds>
     <bind variable="library.parameters.triquadratic_lagrange.variable" source="heart.element_params.triquadratic_lagrange" />
-    <bind variable="library.fem.xi" source="heart.mesh.variable.xi" />
+    <bind variable="library.xi.3d.variable" source="heart.mesh.variable.xi" />
    </binds>
   </ReferenceEvaluator>
 
@@ -110,7 +110,7 @@
   </AbstractEvaluator>
 
 
-  <AggregateEvaluator name="heart.coordinates" valueType="library.coordinates.rc.3d.description">
+  <AggregateEvaluator name="heart.coordinates.template" valueType="library.coordinates.rc.3d">
    <variables>
      <variable name="heart.mesh.variable" />
      <variable name="heart.nodal_component_dofs" />
@@ -141,7 +141,7 @@
   </Domain>
 
   <Field name="heart.coordinates" domain="heart.domain" valueAtlas="heart.geometry.rc3">
-    <evaluator name="heart.coordinates">
+    <evaluator name="heart.coordinates.template">
       <!-- Can only bind to components of the current atlas -->
       <binds>
         <bind_evaluator variable="heart.mesh" source="mesh1.mesh" />

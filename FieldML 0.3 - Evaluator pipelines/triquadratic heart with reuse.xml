@@ -11,36 +11,31 @@
 
   <AbstractEvaluator name="heart.nodes.variable" valueType="heart.nodes.type" />
 
-
-  <MeshType name="heart.mesh.type">
-   <xi dimensions="2"/>
-   <elements>
-    <bounds>
-     <ContiguousEnsembleBounds valueCount="60"/>
-    </bounds>
-   </elements>
+  <MeshType name="heart.mesh.type" xi_component="library.ensemble.xi.3d">
+   <bounds>
+    <ContiguousEnsembleBounds valueCount="60"/>
+   </bounds>
    <shapes default="library.shape.cube" />
   </MeshType>
-
   
   <AbstractEvaluator name="heart.mesh.variable" valueType="heart.mesh.type" />
 
 
-  <EnsembleParameters name="heart.cube3x3x3_nodes" valueType="heart.nodes.type">
+  <ParametersEvaluator name="heart.cube.3x3x3_nodes" valueType="heart.nodes.type">
    <variables>
-     <variable name="library.nodes.cube3x3x3.variable" />
+     <variable name="library.local_nodes.cube.3x3x3.variable" />
      <variable name="heart.mesh.variable" />
    </variables>
    <SemidenseData>
     <denseIndexes>
-     <entry value="library.nodes.cube3x3x3.variable" />
+     <entry value="library.local_nodes.cube.3x3x3.variable" />
      <entry value="heart.mesh.variable.element" />
     </denseIndexes>
     <dataLocation>
      <fileData file="heart.connectivity" type="lines" offset="0" />
     </dataLocation>
    </SemidenseData>
-  </EnsembleParameters>
+  </ParametersEvaluator>
 
 
   <AbstractEvaluator name="heart.nodal_dofs" valueType="library.real.1d">
@@ -50,34 +45,33 @@
   </AbstractEvaluator>
   
 
-  <ContinuousAggregateEvaluator name="heart.element_params.triquadratic_lagrange" valueType="library.parameters.triquadratic_lagrange.type">
+  <AggregateEvaluator name="heart.element_params.triquadratic_lagrange" valueType="library.parameters.triquadratic_lagrange">
    <variables>
      <variable name="heart.mesh.variable" />
      <variable name="heart.nodal_dofs" />
    </variables>
    <binds>
-     <bind_index variable="library.nodes.cube3x3x3.variable" index_number="1"/>
-     <bind variable="heart.nodes.variable" source="heart.cube3x3x3_nodes"/>
+     <bind_index variable="library.local_nodes.cube.3x3x3.variable" index_number="1"/>
+     <bind variable="heart.nodes.variable" source="heart.cube.3x3x3_nodes"/>
    </binds>
-   <sourceEvaluators default="heart.nodal_dofs" />
-  </ContinuousAggregateEvaluator>
+   <componentEvaluators default="heart.nodal_dofs" />
+  </AggregateEvaluator>
 
   
-  <ContinuousReferenceEvaluator name="heart.triquadratic_lagrange" evaluator="library.fem.triquadratic_lagrange"
+  <ReferenceEvaluator name="heart.triquadratic_lagrange" evaluator="library.fem.triquadratic_lagrange"
       valueType="library.real.1d">
    <variables>
      <variable name="heart.mesh.variable" />
      <variable name="heart.nodal_dofs" />
    </variables>
    <binds>
-    <bind variable="library.fem.triquadratic_lagrange.parameters" source="heart.element_params.triquadratic_lagrange" />
-    <bind variable="library.fem.xi" source="heart.mesh.variable.xi" />
+    <bind variable="library.parameters.triquadratic_lagrange.variable" source="heart.element_params.triquadratic_lagrange" />
+    <bind variable="library.xi.3d.variable" source="heart.mesh.variable.xi" />
    </binds>
-  </ContinuousReferenceEvaluator>
+  </ReferenceEvaluator>
 
 
-  <ContinuousPiecewiseEvaluator name="heart.template.triquadratic"
-      valueDescription="library.real.1d">
+  <PiecewiseEvaluator name="heart.template.triquadratic" valueType="library.real.1d">
    <variables>
      <variable name="heart.mesh.variable" />
      <variable name="heart.nodal_dofs" />
@@ -86,12 +80,12 @@
      <bind_index variable="heart.mesh.variable.element" index_number="1" />
    </binds>
    <elementEvaluators default="heart.triquadratic_lagrange" />
-  </ContinuousPiecewiseEvaluator>
+  </PiecewiseEvaluator>
 
 
-  <AbstractEvaluator name="heart.rc3.component" valueType="library.coordinates.rc.3d.components" />
+  <AbstractEvaluator name="heart.rc3.component" valueType="library.ensemble.rc.3d" />
 
-  <ContinuousParameters name="heart.node.coordinates" valueType="library.real.1d">
+  <ParametersEvaluator name="heart.node.coordinates" valueType="library.real.1d">
    <variables>
      <variable name="heart.rc3.component" />
      <variable name="heart.nodes.variable" />
@@ -105,9 +99,9 @@
      <fileData file="heart.node.coordinates" type="lines" offset="0" />
     </dataLocation>
    </SemidenseData>
-  </ContinuousParameters>
+  </ParametersEvaluator>
 
-  <ContinuousParameters name="heart.node.velocity" valueType="library.real.1d">
+  <ParametersEvaluator name="heart.node.fibers" valueType="library.real.1d">
    <variables>
      <variable name="heart.rc3.component" />
      <variable name="heart.nodes.variable" />
@@ -118,12 +112,12 @@
      <entry value="heart.nodes.variable" />
     </denseIndexes>
     <dataLocation>
-     <fileData file="heart.node.velocity" type="lines" offset="0" />
+     <fileData file="heart.node.fibers" type="lines" offset="0" />
     </dataLocation>
    </SemidenseData>
-  </ContinuousParameters>
+  </ParametersEvaluator>
 
-  <ContinuousParameters name="heart.node.pressure" valueType="library.real.1d">
+  <ParametersEvaluator name="heart.node.temperature" valueType="library.real.1d">
    <variables>
      <variable name="heart.nodes.variable" />
    </variables>
@@ -132,10 +126,10 @@
      <entry value="heart.nodes.variable" />
     </denseIndexes>
     <dataLocation>
-     <fileData file="heart.node.pressure" type="lines" offset="0" />
+     <fileData file="heart.node.temperature" type="lines" offset="0" />
     </dataLocation>
    </SemidenseData>
-  </ContinuousParameters>
+  </ParametersEvaluator>
 
 
   <AbstractEvaluator name="heart.nodal_component_dofs" valueType="library.real.1d">
@@ -146,7 +140,7 @@
   </AbstractEvaluator>
 
 
-  <ContinuousAggregateEvaluator name="heart.vector.template" valueType="library.coordinates.rc.3d.description">
+  <AggregateEvaluator name="heart.vector.template" valueType="library.real.3d">
    <variables>
      <variable name="heart.mesh.variable" />
      <variable name="heart.nodal_component_dofs" />
@@ -155,12 +149,12 @@
      <bind_index variable="heart.rc3.component" index_number="1"/>
      <bind variable="heart.nodal_dofs" source="heart.nodal_component_dofs"/>
    </binds>
-   <sourceEvaluators>
+   <componentEvaluators>
     <component number="1" evaluator="heart.template.triquadratic" />
     <component number="2" evaluator="heart.template.triquadratic" />
     <component number="3" evaluator="heart.template.triquadratic" />
-   </sourceEvaluators>
-  </ContinuousAggregateEvaluator>
+   </componentEvaluators>
+  </AggregateEvaluator>
 
 
 
@@ -176,15 +170,15 @@
     </atlas>
   </Domain>
   
-  <Domain name="heart.velocity">
-    <atlas name="velocity">
-      <component name="v" type="library.real.3d"/>
+  <Domain name="heart.fiber_directions">
+    <atlas name="direction">
+      <component name="d" type="library.real.3d"/>
     </atlas>
   </Domain>
   
-  <Domain name="heart.pressure">
-    <atlas name="pressure">
-      <component name="p" type="library.real.1d"/>
+  <Domain name="heart.temperature">
+    <atlas name="temperature">
+      <component name="t" type="library.real.1d"/>
     </atlas>
   </Domain>
 
@@ -198,20 +192,20 @@
     </evaluator>
   </Field>
 
-  <Field name="heart.fluid_velocity" domain="heart.domain" valueAtlas="heart.velocity.velocity.v">
+  <Field name="heart.fiber_directions" domain="heart.domain" valueAtlas="heart.fiber_directions.direction.d">
     <evaluator name="heart.vector.template">
       <binds>
         <bind_evaluator variable="heart.mesh" source="mesh1.mesh" />
-        <bind_evaluator variable="heart.nodal_component_dofs" source="heart.node.velocity"/>
+        <bind_evaluator variable="heart.nodal_component_dofs" source="heart.node.fibers"/>
       </binds>
     </evaluator>
   </Field>
 
-  <Field name="heart.fluid_pressure" domain="heart.domain" valueAtlas="heart.pressure.pressure.p">
+  <Field name="heart.temperature" domain="heart.domain" valueAtlas="heart.temperature.temperature.t">
     <evaluator name="heart.template.triquadratic">
       <binds>
         <bind_evaluator variable="heart.mesh" source="mesh1.mesh" />
-        <bind_evaluator variable="heart.nodal_dofs" source="heart.node.pressure"/>
+        <bind_evaluator variable="heart.nodal_dofs" source="heart.node.temperature"/>
       </binds>
     </evaluator>
   </Field>
