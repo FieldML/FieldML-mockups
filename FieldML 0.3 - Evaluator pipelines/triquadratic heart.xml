@@ -129,28 +129,24 @@
 
 
   <Domain name="heart.domain">
-    <atlas name="mesh1">
-      <component name="mesh" type="heart.mesh"/>
-    </atlas>
+    <atlas name="mesh1" type="heart.mesh"/>
   </Domain>
   
   <Domain name="heart.geometry">
-    <atlas name="coordinates">
-      <component name="rc3" type="library.coordinates.rc3"/>
-    </atlas>
+    <atlas name="coordinates" type="library.coordinates.rc3"/>
   </Domain>
 
-  <Field name="heart.coordinates" domain="heart.domain" valueAtlas="heart.geometry.rc3">
+  <Field name="heart.coordinates" domain="heart.domain" valueAtlas="heart.geometry">
     <evaluator name="heart.coordinates.template">
       <!-- Can only bind to components of the current atlas -->
       <binds>
-        <bind_evaluator variable="heart.mesh" source="mesh1.mesh" />
+        <bind_evaluator variable="heart.mesh" source="mesh1" />
         <bind_evaluator variable="heart.nodal_component_dofs" source="heart.node.coordinates"/>
       </binds>
     </evaluator>
   </Field>
 
-  <Field name="heart.coordinates_times_2" domain="heart.domain" valueAtlas="heart.geometry.rc3">
+  <Field name="heart.coordinates_times_2" domain="heart.domain" valueAtlas="heart.geometry">
     <evaluator name="library.add">
       <!-- Can only bind to components of the current atlas -->
       <binds>
