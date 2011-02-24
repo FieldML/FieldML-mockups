@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fieldml version="0.3_alpha" xsi:noNamespaceSchemaLocation="Fieldml_0.3.xsd"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Region name="cubic_hermite_1d" library="library_0.3.xml">
+
+<EnsembleType name="nodes">
+  <bounds>
+    <ContiguousEnsembleBounds valueCount="4"/>
+  </bounds>
+</EnsembleType>
+
+<AbstractEvaluator name="nodes.variable" valueType="nodes"/>
+
+<MeshType name="mesh" xi_component="library.ensemble.xi.1d">
+  <bounds>
+    <ContiguousEnsembleBounds valueCount="3"/>
+  </bounds>
+  <shapes default="library.shape.line"/>
+</MeshType>
+  
+<AbstractEvaluator name="mesh.variable" valueType="mesh" />
+
+<ParametersEvaluator name="mesh.connectivity.linear" valueType="nodes">
+  <SemidenseData>
+    <denseIndexes>
+      <index evaluator="library.local_nodes.line.2.variable"/>
+      <index evaluator="mesh.variable.element"/>
+    </denseIndexes>
+    <dataLocation>
+      <inlineData>
+        1 2
+        2 3
+        3 4
+      </inlineData>
+    </dataLocation>
+  </SemidenseData>
+</ParametersEvaluator>
+
+<EnsembleType name="derivatives">
+  <bounds>
+    <ContiguousEnsembleBounds valueCount="2"/>
+  </bounds>
+</EnsembleType>
+
+<AbstractEvaluator name="derivatives.variable" valueType="derivatives"/>
+
+<AbstractEvaluator name="dofs.nodal.variable" valueType="library.real.1d">
+  <variables>
+    <variable name="nodes.variable"/>
+    <variable name="derivatives.variable"/>
+  </variables>
+</AbstractEvaluator>
+
+<ParametersEvaluator name="cubic_hermite_parameter.derivative" valueType="derivatives">
+  <SemidenseData>
+    <denseIndexes>
+      <index evaluator="library.parameters.cubic_hermite.ensemble.variable"/>
+    </denseIndexes>
+    <dataLocation>
+      <inlineData>
+      1
+      2
+      1
+      2
+      </inlineData>
+    </dataLocation>
+  </SemidenseData>
+</ParametersEvaluator>
+
+<ParametersEvaluator name="cubic_hermite_parameter.local_node" valueType="library.local_nodes.line.2">
+  <SemidenseData>
+    <denseIndexes>
+      <index evaluator="library.parameters.cubic_hermite.ensemble.variable"/>
+    </denseIndexes>
+    <dataLocation>
+      <inlineData>
+      1
+      1
+      2
+      2
+      </inlineData>
+    </dataLocation>
+  </SemidenseData>
+</ParametersEvaluator>
+
+<AggregateEvaluator name="cubic_hermite.parameters" valueType="library.parameters.cubic_hermite">
+ <binds>
+   <bind_index variable="library.parameters.cubic_hermite.ensemble.variable" index_number="1"/>
+   <bind variable="derivatives.variable" source="cubic_hermite_parameter.derivative"/>
+   <bind variable="library.local_nodes.line.2.variable" source="cubic_hermite_parameter.local_node"/>
+   <bind variable="nodes.variable" source="mesh.connectivity.linear"/>
+ </binds>
+ <componentEvaluators default="dofs.nodal.variable" />
+</AggregateEvaluator>
+
+<ParametersEvaluator name="dofs.nodal.geometric" valueType="library.real.1d">
+  <SemidenseData>
+    <denseIndexes>
+      <index evaluator="derivatives.variable"/>
+      <index evaluator="library.ensemble.rc.2d.variable"/>
+      <index evaluator="nodes.variable"/>
+    </denseIndexes>
+    <dataLocation>
+      <inlineData>
+        0.0000000 
+        0.70710678118654746
+        0.0000000  
+       -0.70710678118654746
+        1.0000000   
+        0.70710678118654746
+        0.0000000  
+       -0.70710678118654746
+        3.0000000   
+        0.5000000
+        0.0000000   
+        0.86602540378443860
+        7.0000000   
+        0.5000000
+        0.0000000  
+       -0.86602540378443860
+      </inlineData>
+    </dataLocation>
+  </SemidenseData>
+</ParametersEvaluator>
+
+<ReferenceEvaluator name="cubic_hermite.interpolator" evaluator="library.fem.cubic_hermite" valueType="library.real.1d">
+  <binds>
+    <bind variable="library.xi.1d.variable" source="mesh.variable.xi"/>
+    <bind variable="library.parameters.cubic_hermite.variable" source="cubic_hermite.parameters"/>
+  </binds>
+</ReferenceEvaluator>
+
+<PiecewiseEvaluator name="template.cubic_hermite" valueType="library.real.1d">
+  <binds>
+    <bind_index variable="mesh.variable.element" index_number="1" />
+  </binds>
+  <elementEvaluators default="cubic_hermite.interpolator"/>
+</PiecewiseEvaluator>
+
+<AggregateEvaluator name="coordinates" valueType="library.coordinates.rc.2d">
+  <binds>
+    <bind_index variable="library.ensemble.rc.2d.variable" index_number="1" />
+    <bind variable="dofs.nodal.variable" source="dofs.nodal.geometric"/>
+  </binds>
+  <componentEvaluators>
+    <component number="1" evaluator="template.cubic_hermite"/>
+    <component number="2" evaluator="template.cubic_hermite"/>
+  </componentEvaluators>
+</AggregateEvaluator>
+
+
+
+
+<!-- Scale factor stuff starts here -->
+
+<ParametersEvaluator name="dofs.scale_factors.unit" valueType="library.real.1d">
+  <SemidenseData>
+    <denseIndexes>
+      <index evaluator="library.parameters.cubic_hermite.ensemble.variable"/>
+      <index evaluator="mesh.variable.element"/>
+    </denseIndexes>
+    <dataLocation>
+      <inlineData>
+        1.0000 1.0000 1.0000 1.0000 
+        1.0000 1.0000 1.0000 1.0000 
+        1.0000 1.0000 1.0000 1.0000 
+      </inlineData>
+    </dataLocation>
+  </SemidenseData>
+</ParametersEvaluator>
+
+<ParametersEvaluator name="dofs.scale_factors.arithmetic_mean" valueType="library.real.1d">
+  <SemidenseData>
+    <denseIndexes>
+      <index evaluator="library.parameters.cubic_hermite.ensemble.variable"/>
+      <index evaluator="mesh.variable.element"/>
+    </denseIndexes>
+    <dataLocation>
+      <inlineData>
+        1.0000   1.15805243867884400   1.0000   1.76422072259643640
+        1.0000   1.76422072259643640   1.0000   3.46060001632529040
+        1.0000   3.46060001632529040   1.0000   4.55081102613655200
+      </inlineData>
+    </dataLocation>
+  </SemidenseData>
+</ParametersEvaluator>
+
+<ParametersEvaluator name="dofs.scale_factors.geometric_mean" valueType="library.real.1d">
+  <SemidenseData>
+    <denseIndexes>
+      <index evaluator="library.parameters.cubic_hermite.ensemble.variable"/>
+      <index evaluator="mesh.variable.element"/>
+    </denseIndexes>
+    <dataLocation>
+      <inlineData>
+        1.0000   1.14578588295432260   1.0000   1.63596346951561930
+        1.0000   1.52106221437293090   1.0000   3.04884269162763920
+        1.0000   3.04884269162763920   1.0000   4.50580478146703540
+      </inlineData>
+    </dataLocation>
+  </SemidenseData>
+</ParametersEvaluator>
+
+<ParametersEvaluator name="dofs.scale_factors.harmonic_mean" valueType="library.real.1d">
+  <SemidenseData>
+    <denseIndexes>
+      <index evaluator="library.parameters.cubic_hermite.ensemble.variable"/>
+      <index evaluator="mesh.variable.element"/>
+    </denseIndexes>
+    <dataLocation>
+      <inlineData>
+        1.0000000   1.13530582992784220   1.0000000   1.52106221437293090
+        1.0000000   1.63596346951561930   1.0000000   3.25211262135579470
+        1.0000000   3.25211262135579470   1.0000000   4.52780189870069800
+      </inlineData>
+    </dataLocation>
+  </SemidenseData>
+</ParametersEvaluator>
+
+<AbstractEvaluator name="dofs.scale_factors.variable" valueType="library.real.1d"/>
+
+<ReferenceEvaluator name="cubic_hermite.scaled_parameters" evaluator="library.math.scale_vector_4" valueType="library.parameters.cubic_hermite">
+  <binds>
+    <bind variable="library.math.vector_4.variable" source="dofs.scale_factors.variable"/>
+    <bind variable="library.math.vector_4.variable_2" source="cubic_hermite.parameters"/>
+  </binds>
+</ReferenceEvaluator>
+
+<AggregateEvaluator name="cubic_hermite.scale_vector" valueType="library.parameters.cubic_hermite">
+  <binds>
+    <bind_index variable="library.parameters.cubic_hermite.ensemble.variable" index_number="1"/>
+  </binds>
+  <componentEvaluators default="dofs.scale_factors.variable"/> 
+</AggregateEvaluator>
+
+<ReferenceEvaluator name="cubic_hermite.scaled_interpolator" evaluator="library.fem.cubic_hermite" valueType="library.real.1d">
+  <binds>
+    <bind variable="library.xi.1d.variable" source="mesh.variable.xi"/>
+    <bind variable="library.parameters.cubic_hermite.variable" source="cubic_hermite.scaled_parameters"/>
+  </binds>
+</ReferenceEvaluator>
+
+<PiecewiseEvaluator name="template.scaled_cubic_hermite" valueType="library.real.1d">
+  <binds>
+    <bind_index variable="mesh.variable.element" index_number="1" />
+  </binds>
+  <elementEvaluators default="cubic_hermite.scaled_interpolator"/>
+</PiecewiseEvaluator>
+
+<AggregateEvaluator name="coordinates.unit" valueType="library.coordinates.rc.2d">
+  <binds>
+    <bind_index variable="library.ensemble.rc.2d.variable" index_number="1" />
+    <bind variable="dofs.nodal.variable" source="dofs.nodal.geometric"/>
+    <bind variable="dofs.scale_factors.variable" source="dofs.scale_factors.unit"/>
+  </binds>
+  <componentEvaluators>
+    <component number="1" evaluator="template.scaled_cubic_hermite"/>
+    <component number="2" evaluator="template.scaled_cubic_hermite"/>
+  </componentEvaluators>
+</AggregateEvaluator>
+
+<AggregateEvaluator name="coordinates.arithmetic" valueType="library.coordinates.rc.2d">
+  <binds>
+    <bind_index variable="library.ensemble.rc.2d.variable" index_number="1" />
+    <bind variable="dofs.nodal.variable" source="dofs.nodal.geometric"/>
+    <bind variable="dofs.scale_factors.variable" source="dofs.scale_factors.arithmetic"/>
+  </binds>
+  <componentEvaluators>
+    <component number="1" evaluator="template.scaled_cubic_hermite"/>
+    <component number="2" evaluator="template.scaled_cubic_hermite"/>
+  </componentEvaluators>
+</AggregateEvaluator>
+
+<AggregateEvaluator name="coordinates.geometric" valueType="library.coordinates.rc.2d">
+  <binds>
+    <bind_index variable="library.ensemble.rc.2d.variable" index_number="1" />
+    <bind variable="dofs.nodal.variable" source="dofs.nodal.geometric"/>
+    <bind variable="dofs.scale_factors.variable" source="dofs.scale_factors.geometric"/>
+  </binds>
+  <componentEvaluators>
+    <component number="1" evaluator="template.scaled_cubic_hermite"/>
+    <component number="2" evaluator="template.scaled_cubic_hermite"/>
+  </componentEvaluators>
+</AggregateEvaluator>
+
+<AggregateEvaluator name="coordinates.harmonic" valueType="library.coordinates.rc.2d">
+  <binds>
+    <bind_index variable="library.ensemble.rc.2d.variable" index_number="1" />
+    <bind variable="dofs.nodal.variable" source="dofs.nodal.geometric"/>
+    <bind variable="dofs.scale_factors.variable" source="dofs.scale_factors.harmonic"/>
+  </binds>
+  <componentEvaluators>
+    <component number="1" evaluator="template.scaled_cubic_hermite"/>
+    <component number="2" evaluator="template.scaled_cubic_hermite"/>
+  </componentEvaluators>
+</AggregateEvaluator>
+
+</Region>
+</fieldml>
