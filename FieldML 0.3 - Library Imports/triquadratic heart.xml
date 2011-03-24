@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Fieldml version="0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Fieldml.xsd">
+ <Region name="heart">
+ 
+  <Import location="library_0.3.xml" region="library">
+    <ImportType localName="real.type" sourceName="library.real.1d"/>
+    <ImportType localName="xi.ensemble" sourceName="library.ensemble.xi.3d"/>
+    <ImportType localName="triquadratic.parameters.type" sourceName="library.parameters.3d.triquadraticLagrange"/>
+    <ImportType localName="rc3.ensemble" sourceName="library.ensemble.rc.3d"/>
+    <ImportType localName="rc3.type" sourceName="library.coordinates.rc.3d"/>
+
+    <ImportEvaluator localName="triquadratic.node.variable" sourceName="library.localNodes.3d.cube3x3x3.variable"/>
+    <ImportEvaluator localName="triquadratic.parameters.variable" sourceName="library.parameters.3d.triquadraticLagrange.variable"/>
+    <ImportEvaluator localName="triquadratic.interpolator" sourceName="library.interpolator.3d.unit.triquadraticLagrange"/>
+    <ImportEvaluator localName="xi.variable" sourceName="library.xi.3d.variable"/>
+  </Import>
+
+  <EnsembleType name="heart.nodes.type">
+   <Members>
+    <MemberRange min="1" max="633" />
+   </Members>
+  </EnsembleType>
+
+
+  <AbstractEvaluator name="heart.nodes.variable" valueType="heart.nodes.type" />
+
+  <MeshType name="heart.mesh.type" xiComponent="xi.ensemble">
+   <Elements>
+    <MemberRange min="1" max="60"/>
+   </Elements>
+   <Shapes default="library.shape.cube" />
+  </MeshType>
+  
+  <AbstractEvaluator name="heart.mesh.variable" valueType="heart.mesh.type" />
+
+
+  <ParametersEvaluator name="heart.cube.3x3x3_nodes" valueType="heart.nodes.type">
+   <Variables>
+     <Variable name="triquadratic.node.variable" />
+     <Variable name="heart.mesh.variable" />
+   </Variables>
+   <SemidenseData>
+    <DenseIndexes>
+     <IndexEvaluator evaluator="triquadratic.node.variable" />
+     <IndexEvaluator evaluator="heart.mesh.variable.element" />
+    </DenseIndexes>
+    <DataLocation>
+     <FileData file="heart.connectivity" type="lines" offset="0" />
+    </DataLocation>
+   </SemidenseData>
+  </ParametersEvaluator>
+
+
+  <AbstractEvaluator name="heart.nodal_dofs" valueType="real.type">
+   <Variables>
+     <Variable name="heart.nodes.variable" />
+   </Variables>
+  </AbstractEvaluator>
+  
+
+  <AggregateEvaluator name="heart.element_params.triquadratic_lagrange" valueType="triquadratic.parameters.type">
+   <Variables>
+     <Variable name="heart.mesh.variable" />
+     <Variable name="heart.nodal_dofs" />
+   </Variables>
+   <Bindings>
+     <BindIndex variable="triquadratic.node.variable" indexNumber="1"/>
+     <Bind variable="heart.nodes.variable" source="heart.cube.3x3x3_nodes"/>
+   </Bindings>
+   <ComponentEvaluators default="heart.nodal_dofs" />
+  </AggregateEvaluator>
+
+  
+  <ReferenceEvaluator name="heart.triquadratic_lagrange" evaluator="triquadratic.interpolator" valueType="real.type">
+   <Variables>
+     <Variable name="heart.mesh.variable" />
+     <Variable name="heart.nodal_dofs" />
+   </Variables>
+   <Bindings>
+    <Bind variable="triquadratic.parameters.variable" source="heart.element_params.triquadratic_lagrange" />
+    <Bind variable="xi.variable" source="heart.mesh.variable.xi" />
+   </Bindings>
+  </ReferenceEvaluator>
+
+
+  <PiecewiseEvaluator name="heart.template.triquadratic" valueType="real.type">
+   <Variables>
+     <Variable name="heart.mesh.variable" />
+     <Variable name="heart.nodal_dofs" />
+   </Variables>
+   <Bindings>
+     <BindIndex variable="heart.mesh.variable.element" indexNumber="1" />
+   </Bindings>
+   <ElementEvaluators default="heart.triquadratic_lagrange" />
+  </PiecewiseEvaluator>
+
+
+  <AbstractEvaluator name="heart.rc3.component" valueType="rc3.ensemble" />
+
+  <ParametersEvaluator name="heart.node.coordinates" valueType="real.type">
+   <Variables>
+     <Variable name="heart.rc3.component" />
+     <Variable name="heart.nodes.variable" />
+   </Variables>
+   <SemidenseData>
+    <DenseIndexes>
+     <IndexEvaluator evaluator="heart.rc3.component" />
+     <IndexEvaluator evaluator="heart.nodes.variable" />
+    </DenseIndexes>
+    <DataLocation>
+     <FileData file="heart.node.coordinates" type="lines" offset="0" />
+    </DataLocation>
+   </SemidenseData>
+  </ParametersEvaluator>
+
+
+  <AbstractEvaluator name="heart.nodal_component_dofs" valueType="real.type">
+   <Variables>
+     <Variable name="heart.rc3.component" />
+     <Variable name="heart.nodes.variable" />
+   </Variables>
+  </AbstractEvaluator>
+
+
+  <AggregateEvaluator name="heart.coordinates.template" valueType="rc3.type">
+   <Variables>
+     <Variable name="heart.mesh.variable" />
+     <Variable name="heart.nodal_component_dofs" />
+   </Variables>
+   <Bindings>
+     <BindIndex variable="heart.rc3.component" indexNumber="1"/>
+     <Bind variable="heart.nodal_dofs" source="heart.nodal_component_dofs"/>
+   </Bindings>
+   <ComponentEvaluators>
+    <ComponentEvaluator number="1" evaluator="heart.template.triquadratic" />
+    <ComponentEvaluator number="2" evaluator="heart.template.triquadratic" />
+    <ComponentEvaluator number="3" evaluator="heart.template.triquadratic" />
+   </ComponentEvaluators>
+  </AggregateEvaluator>
+  
+  <ReferenceEvaluator name="heart.coordinates" evaluator="heart.coordinates.template">
+   <Variables>
+     <Variable name="heart.mesh.variable" />
+   </Variables>
+   <Bindings>
+    <Bind variable="heart.nodal_component_dofs" source="heart.node.coordinates" />
+   </Bindings>
+  </ReferenceEvaluator>
+
+ </Region>
+</Fieldml>
