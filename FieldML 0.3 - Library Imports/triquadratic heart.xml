@@ -3,16 +3,16 @@
  <Region name="heart">
  
   <Import location="library_0.3.xml" region="library">
-    <ImportType localName="real.type" sourceName="library.real.1d"/>
-    <ImportType localName="xi.ensemble" sourceName="library.ensemble.xi.3d"/>
-    <ImportType localName="triquadratic.parameters.type" sourceName="library.parameters.3d.triquadraticLagrange"/>
-    <ImportType localName="rc3.ensemble" sourceName="library.ensemble.rc.3d"/>
-    <ImportType localName="rc3.type" sourceName="library.coordinates.rc.3d"/>
+    <ImportType localName="real.type" remoteName="library.real.1d"/>
+    <ImportType localName="xi.ensemble" remoteName="library.ensemble.xi.3d"/>
+    <ImportType localName="triquadratic.parameters.type" remoteName="library.parameters.3d.triquadraticLagrange"/>
+    <ImportType localName="rc3.ensemble" remoteName="library.ensemble.rc.3d"/>
+    <ImportType localName="rc3.type" remoteName="library.coordinates.rc.3d"/>
 
-    <ImportEvaluator localName="triquadratic.node.variable" sourceName="library.localNodes.3d.cube3x3x3.variable"/>
-    <ImportEvaluator localName="triquadratic.parameters.variable" sourceName="library.parameters.3d.triquadraticLagrange.variable"/>
-    <ImportEvaluator localName="triquadratic.interpolator" sourceName="library.interpolator.3d.unit.triquadraticLagrange"/>
-    <ImportEvaluator localName="xi.variable" sourceName="library.xi.3d.variable"/>
+    <ImportEvaluator localName="triquadratic.node.variable" remoteName="library.localNodes.3d.cube3x3x3.variable"/>
+    <ImportEvaluator localName="triquadratic.parameters.variable" remoteName="library.parameters.3d.triquadraticLagrange.variable"/>
+    <ImportEvaluator localName="triquadratic.interpolator" remoteName="library.interpolator.3d.unit.triquadraticLagrange"/>
+    <ImportEvaluator localName="xi.variable" remoteName="library.xi.3d.variable"/>
   </Import>
 
   <EnsembleType name="heart.nodes.type">

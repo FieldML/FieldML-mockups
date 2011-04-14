@@ -8,22 +8,13 @@
     <ImportType localName="triquadratic.parameters.type" remoteName="library.parameters.3d.triquadraticLagrange"/>
     <ImportType localName="rc3.ensemble" remoteName="library.ensemble.rc.3d"/>
     <ImportType localName="rc3.type" remoteName="library.coordinates.rc.3d"/>
+    <ImportType localName="localNodes.cube3x3x3" remoteName="library.localNodes.3d.cube3x3x3"/>
 
     <ImportEvaluator localName="triquadratic.node.variable" remoteName="library.localNodes.3d.cube3x3x3.variable"/>
     <ImportEvaluator localName="triquadratic.parameters.variable" remoteName="library.parameters.3d.triquadraticLagrange.variable"/>
     <ImportEvaluator localName="triquadratic.interpolator" remoteName="library.interpolator.3d.unit.triquadraticLagrange"/>
     <ImportEvaluator localName="xi.variable" remoteName="library.xi.3d.variable"/>
   </Import>
-
-  <DataObject name="heart.epicardium.nodes.data">
-    <Source>
-        <InlineSource>
-          <!-- Incorrect. Values one for illustrative purposes. -->
-          1 5 13 14 15 16 25
-        </InlineSource>
-    </Source>
-    <Entries count="1" length="7" head="0" tail="0" />
-  </DataObject>
 
   <DataObject name="heart.connectivity">
     <Source>
@@ -44,25 +35,29 @@
     <MemberRange min="1" max="633" />
    </Members>
   </EnsembleType>
-  
-  <EnsembleType name="heart.epicardium.nodes">
-    <Members>
-      <MemberListData data="heart.epicardium.nodes.data" count="7"/>
-    </Members>
-  </EnsembleType>
 
 
   <AbstractEvaluator name="heart.nodes.variable" valueType="heart.nodes.type" />
 
+  <DataObject name="heart.element.data">
+    <Source>
+      <InlineSource>
+        1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+        21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
+        41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60
+      </InlineSource>
+    </Source>
+    <Entries count="1" length="60"/>
+  </DataObject>
+  
   <MeshType name="heart.mesh.type" xiComponent="xi.ensemble">
    <Elements>
-    <MemberRange min="1" max="60"/>
+    <MemberListData data="heart.element.data"/>
    </Elements>
    <Shapes default="library.shape.cube" />
   </MeshType>
   
   <AbstractEvaluator name="heart.mesh.variable" valueType="heart.mesh.type" />
-
 
   <ParametersEvaluator name="heart.cube.3x3x3_nodes" valueType="heart.nodes.type">
    <Variables>
@@ -72,7 +67,7 @@
    <SemidenseData data="heart.connectivity">
     <DenseIndexes>
      <IndexEvaluator evaluator="triquadratic.node.variable" />
-     <IndexEvaluator evaluator="heart.mesh.variable.element" />
+     <IndexEvaluator evaluator="heart.mesh.variable.element" order="heart.element.data" />
     </DenseIndexes>
    </SemidenseData>
   </ParametersEvaluator>
