@@ -2,11 +2,11 @@
 <Fieldml version="0.3.5alpha" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Fieldml.xsd">
  <Region name="heart">
 
-  <Import location="library_0.3.xml" region="library">
+  <Import location="library.xml" region="library">
     <ImportType localName="real.type" remoteName="library.real.1d"/>
-    <ImportType localName="xi.ensemble" remoteName="library.ensemble.xi.3d"/>
+    <ImportType localName="xi.ensemble" remoteName="library.xi.3d.component"/>
     <ImportType localName="triquadratic.parameters.type" remoteName="library.parameters.3d.triquadraticLagrange"/>
-    <ImportType localName="rc3.ensemble" remoteName="library.ensemble.rc.3d"/>
+    <ImportType localName="rc3.ensemble" remoteName="library.coordinates.rc.3d.component"/>
     <ImportType localName="rc3.type" remoteName="library.coordinates.rc.3d"/>
     <ImportType localName="localNodes.cube3x3x3" remoteName="library.localNodes.3d.cube3x3x3"/>
 
@@ -50,10 +50,15 @@
     <Entries count="1" length="60"/>
   </DataObject>
   
-  <MeshType name="heart.mesh.type" xiComponent="xi.ensemble">
-   <Elements>
-    <MemberListData data="heart.element.data"/>
+  <MeshType name="heart.mesh.type">
+   <Elements name="elements">
+     <Members>
+       <MemberListData data="heart.element.data" count="60"/>
+     </Members>
    </Elements>
+   <Xi name="xi">
+     <Components name="heart.mesh.type.xi.component" count="3"/>
+   </Xi>
    <Shapes default="library.shape.cube" />
   </MeshType>
   
@@ -67,7 +72,7 @@
    <SemidenseData data="heart.connectivity">
     <DenseIndexes>
      <IndexEvaluator evaluator="triquadratic.node.variable" />
-     <IndexEvaluator evaluator="heart.mesh.variable.element" order="heart.element.data" />
+     <IndexEvaluator evaluator="heart.mesh.variable.elements" order="heart.element.data" />
     </DenseIndexes>
    </SemidenseData>
   </ParametersEvaluator>
@@ -110,9 +115,9 @@
      <Variable name="heart.mesh.variable" />
      <Variable name="heart.nodal_dofs" />
    </Variables>
-   <Bindings>
-     <BindIndex variable="heart.mesh.variable.element" indexNumber="1" />
-   </Bindings>
+   <IndexEvaluators>
+     <IndexEvaluator evaluator="heart.mesh.variable.elements" indexNumber="1" />
+   </IndexEvaluators>
    <ElementEvaluators default="heart.triquadratic_lagrange" />
   </PiecewiseEvaluator>
 
@@ -151,9 +156,9 @@
      <Bind variable="heart.nodal_dofs" source="heart.nodal_component_dofs"/>
    </Bindings>
    <ComponentEvaluators>
-    <ComponentEvaluator number="1" evaluator="heart.template.triquadratic" />
-    <ComponentEvaluator number="2" evaluator="heart.template.triquadratic" />
-    <ComponentEvaluator number="3" evaluator="heart.template.triquadratic" />
+    <ComponentEvaluator component="1" evaluator="heart.template.triquadratic" />
+    <ComponentEvaluator component="2" evaluator="heart.template.triquadratic" />
+    <ComponentEvaluator component="3" evaluator="heart.template.triquadratic" />
    </ComponentEvaluators>
   </AggregateEvaluator>
   
