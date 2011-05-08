@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Fieldml version="0.3.5alpha" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Fieldml.xsd">
+<Fieldml version="0.3.5alpha"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xsi:noNamespaceSchemaLocation="Fieldml.xsd">
  <Region name="heart">
 
   <Import location="library.xml" region="library">
     <ImportType localName="real.type" remoteName="library.real.1d"/>
-    <ImportType localName="xi.ensemble" remoteName="library.xi.3d.component"/>
+    <ImportType localName="xi.ensemble" remoteName="library.chart.3d.component"/>
     <ImportType localName="triquadratic.parameters.type" remoteName="library.parameters.3d.triquadraticLagrange"/>
     <ImportType localName="rc3.ensemble" remoteName="library.coordinates.rc.3d.component"/>
     <ImportType localName="rc3.type" remoteName="library.coordinates.rc.3d"/>
@@ -13,7 +16,7 @@
     <ImportEvaluator localName="triquadratic.node.variable" remoteName="library.localNodes.3d.cube3x3x3.variable"/>
     <ImportEvaluator localName="triquadratic.parameters.variable" remoteName="library.parameters.3d.triquadraticLagrange.variable"/>
     <ImportEvaluator localName="triquadratic.interpolator" remoteName="library.interpolator.3d.unit.triquadraticLagrange"/>
-    <ImportEvaluator localName="xi.variable" remoteName="library.xi.3d.variable"/>
+    <ImportEvaluator localName="xi.variable" remoteName="library.chart.3d.variable"/>
   </Import>
 
   <DataResource>
@@ -28,28 +31,28 @@
 
   <DataResource>
     <TextSource>
-        <TextFile filename="heart.connectivity" />
+        <TextFile xlink:href="heart.connectivity" />
         <DataSource name="heart.connectivity" firstLine="1" count="60" length="27" head="0" tail="0" />
     </TextSource>
   </DataResource>
 
   <DataResource>
     <TextSource>
-        <TextFile filename="heart.node.coordinates" />
+        <TextFile xlink:href="heart.node.coordinates" />
         <DataSource name="heart.node.coordinates_data" firstLine="1" count="633" length="3" head="0" tail="0" />
     </TextSource>
   </DataResource>
  
   <DataResource>
-    <Hdf5Source>
-        <Hdf5File filename="raw_data.h5"/>
+    <HDF5Source>
+        <HDF5File xlink:href="raw_data.h5"/>
         <DataSource name="heart.hdf5.node.coordinates_data">
-          <RawFormat dataset="/foo/bar/data"/>
+          <DenseArray dataset="/foo/bar/data"/>
         </DataSource>
         <DataSource name="heart.hdf5.node.connectivity_data">
-          <YaleSparseMatrixFormat cellData="/foo/bar/cell_data" rowIndexes="/foo/bar/row_data" columnIndexes="/foo/bar/column_data"/>
+          <CSRArray cellData="/foo/bar/cell_data" rowDataOffsets="/foo/bar/row_data" columnIndexes="/foo/bar/column_data"/>
         </DataSource>
-    </Hdf5Source>
+    </HDF5Source>
   </DataResource>
  
   <EnsembleType name="heart.nodes.type">
@@ -78,9 +81,9 @@
        <MemberListData data="heart.element.data" count="60"/>
      </Members>
    </Elements>
-   <Xi name="xi">
+   <Chart name="xi">
      <Components name="heart.mesh.type.xi.component" count="3"/>
-   </Xi>
+   </Chart>
    <Shapes default="library.shape.cube" />
   </MeshType>
   
