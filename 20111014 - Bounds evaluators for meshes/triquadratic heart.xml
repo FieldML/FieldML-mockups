@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Fieldml version="0.4.0"
+    xsi:noNamespaceSchemaLocation="http://www.fieldml.org/resources/xml/0.4/FieldML_0.4.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+ <Region name="heart">
+
+  <Import xlink:href="http://www.fieldml.org/resources/xml/0.4/FieldML_Library_0.4.xml" region="library">
+    <ImportType localName="real.type" remoteName="real.1d"/>
+    <ImportType localName="xi.ensemble" remoteName="chart.3d.component"/>
+    <ImportType localName="triquadratic.parameters.type" remoteName="parameters.3d.unit.triquadraticLagrange"/>
+    <ImportType localName="rc3.ensemble" remoteName="coordinates.rc.3d.component"/>
+    <ImportType localName="rc3.type" remoteName="coordinates.rc.3d"/>
+    <ImportType localName="localNodes.cube3x3x3" remoteName="localNodes.3d.cube3x3x3"/>
+    <ImportType localName="boolean" remoteName="boolean"/>
+
+    <ImportEvaluator localName="triquadratic.node.argument" remoteName="localNodes.3d.cube3x3x3.argument"/>
+    <ImportEvaluator localName="triquadratic.parameters.argument" remoteName="parameters.3d.unit.triquadraticLagrange.argument"/>
+    <ImportEvaluator localName="triquadratic.interpolator" remoteName="interpolator.3d.unit.triquadraticLagrange"/>
+    <ImportEvaluator localName="xi.argument" remoteName="chart.3d.argument"/>
+  </Import>
+
+  <DataResource name="heart.epicardium.nodes.resource">
+    <DataResourceDescription>
+      <DataResourceHref xlink:href="epicardium_nodes.txt" format="PLAIN_TEXT"/>
+    </DataResourceDescription>
+    <ArrayDataSource name="heart.epicardium.nodes.data" location="1" rank="1">
+      <RawArraySize>
+        12
+      </RawArraySize>
+      <ArrayDataSize>
+        12
+      </ArrayDataSize>
+      <ArrayDataOffset>
+        0
+      </ArrayDataOffset>
+    </ArrayDataSource>
+  </DataResource>
+
+  <DataResource name="heart.elements.resource">
+    <DataResourceDescription>
+      <DataResourceString>
+        1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+        21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
+        41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60
+      </DataResourceString>
+    </DataResourceDescription>
+    <ArrayDataSource name="heart.element.data" location="1" rank="1">
+      <RawArraySize>
+        60
+      </RawArraySize>
+    </ArrayDataSource>
+  </DataResource>
+  
+  <DataResource name="heart.hdf5.resource">
+    <DataResourceDescription>
+      <DataResourceHref xlink:href="raw_data.h5" format="HDF5"/>
+    </DataResourceDescription>
+    <ArrayDataSource name="heart.hdf5.node.coordinates_data" location="/foo/bar/coordinates_data" rank="2"/>
+    <ArrayDataSource name="heart.hdf5.node.connectivity_keys" location="/foo/bar/connectivity_keys" rank="2"/>
+    <ArrayDataSource name="heart.hdf5.node.connectivity_values" location="/foo/bar/connectivity_values" rank="2"/>
+  </DataResource>
+
+  <EnsembleType name="heart.nodes.type">
+   <Members>
+    <MemberRange min="1" max="633" />
+   </Members>
+  </EnsembleType>
+
+
+  <ArgumentEvaluator name="heart.nodes.argument" valueType="heart.nodes.type" />
+
+  <MeshType name="heart.mesh.type">
+   <Elements name="elements">
+     <Members>
+       <MemberListData data="heart.element.data" count="60"/>
+     </Members>
+   </Elements>
+   <Chart name="xi">
+     <Components name="heart.mesh.type.xi.component" count="3"/>
+   </Chart>
+   <Shapes evaluator="heart.mesh.bounds" />
+  </MeshType>
+  
+  <ArgumentEvaluator name="heart.mesh.argument" valueType="heart.mesh.type" />
+
+  <ExternalEvaluator name="shape.cube" valueType="boolean">
+    <Arguments>
+      <Argument name="xi.argument"/>
+    </Arguments>
+  </ExternalEvaluator>
+  
+  <PiecewiseEvaluator name="heart.mesh.bounds" valueType="boolean">
+   <IndexEvaluators>
+     <IndexEvaluator evaluator="heart.mesh.argument.elements" indexNumber="1" />
+   </IndexEvaluators>
+   <ElementEvaluators default="shape.cube" />
+  </PiecewiseEvaluator>
+  
+  <ParameterEvaluator name="heart.cube.3x3x3_nodes" valueType="heart.nodes.type">
+   <DOKArrayData keyData="heart.hdf5.node.connectivity_keys" valueData="heart.hdf5.node.connectivity_values">
+    <SparseIndexes>
+     <IndexEvaluator evaluator="heart.mesh.argument.elements" />
+    </SparseIndexes>
+    <DenseIndexes>
+     <IndexEvaluator evaluator="triquadratic.node.argument" />
+    </DenseIndexes>
+   </DOKArrayData>
+  </ParameterEvaluator>
+
+
+  <ArgumentEvaluator name="heart.nodal_dofs" valueType="real.type">
+   <Arguments>
+     <Argument name="heart.nodes.argument" />
+   </Arguments>
+  </ArgumentEvaluator>
+  
+
+  <AggregateEvaluator name="heart.element_params.triquadratic_lagrange" valueType="triquadratic.parameters.type">
+   <Bindings>
+     <BindIndex argument="triquadratic.node.argument" indexNumber="1"/>
+     <Bind argument="heart.nodes.argument" source="heart.cube.3x3x3_nodes"/>
+   </Bindings>
+   <ComponentEvaluators default="heart.nodal_dofs" />
+  </AggregateEvaluator>
+
+  
+  <ReferenceEvaluator name="heart.triquadratic_lagrange" evaluator="triquadratic.interpolator" valueType="real.type">
+   <Bindings>
+    <Bind argument="triquadratic.parameters.argument" source="heart.element_params.triquadratic_lagrange" />
+    <Bind argument="xi.argument" source="heart.mesh.argument.xi" />
+   </Bindings>
+  </ReferenceEvaluator>
+
+
+  <PiecewiseEvaluator name="heart.template.triquadratic" valueType="real.type">
+   <IndexEvaluators>
+     <IndexEvaluator evaluator="heart.mesh.argument.elements" indexNumber="1" />
+   </IndexEvaluators>
+   <ElementEvaluators default="heart.triquadratic_lagrange" />
+  </PiecewiseEvaluator>
+
+
+  <ArgumentEvaluator name="heart.rc3.component" valueType="rc3.ensemble" />
+
+  <ParameterEvaluator name="heart.node.coordinates" valueType="real.type">
+   <DenseArrayData data="heart.hdf5.node.coordinates_data">
+    <DenseIndexes>
+     <IndexEvaluator evaluator="heart.rc3.component" />
+     <IndexEvaluator evaluator="heart.nodes.argument" />
+    </DenseIndexes>
+   </DenseArrayData>
+  </ParameterEvaluator>
+
+
+  <ArgumentEvaluator name="heart.nodal_component_dofs" valueType="real.type">
+   <Arguments>
+     <Argument name="heart.nodes.argument" />
+     <Argument name="heart.rc3.component" />
+   </Arguments>
+  </ArgumentEvaluator>
+
+
+  <AggregateEvaluator name="heart.coordinates.template" valueType="rc3.type">
+   <Bindings>
+     <BindIndex argument="heart.rc3.component" indexNumber="1"/>
+     <Bind argument="heart.nodal_dofs" source="heart.nodal_component_dofs"/>
+   </Bindings>
+   <ComponentEvaluators>
+    <ComponentEvaluator component="1" evaluator="heart.template.triquadratic" />
+    <ComponentEvaluator component="2" evaluator="heart.template.triquadratic" />
+    <ComponentEvaluator component="3" evaluator="heart.template.triquadratic" />
+   </ComponentEvaluators>
+  </AggregateEvaluator>
+  
+  <ReferenceEvaluator name="heart.coordinates" evaluator="heart.coordinates.template">
+   <Bindings>
+    <Bind argument="heart.nodal_component_dofs" source="heart.node.coordinates" />
+   </Bindings>
+  </ReferenceEvaluator>
+
+ </Region>
+</Fieldml>
