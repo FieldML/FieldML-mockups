@@ -27,23 +27,12 @@
     <TextDataSource name="heart.epicardium.nodes.data" firstLine="1" count="1" length="7" head="0" tail="0" />
   </TextInlineResource>
 
-  <TextFileResource name="heart.connectivity.resource" xlink:href="heart.connectivity">
-    <TextDataSource name="heart.connectivity" firstLine="1" count="60" length="27" head="0" tail="0" />
-  </TextFileResource>
+  <ArrayDataResource name="heart.hdf5.resource" format="HDF5" xlink:href="raw_data.h5">
+    <ArrayDataSource name="heart.hdf5.node.coordinates_data" sourceName="/foo/bar/coordinates_data"/>
+    <ArrayDataSource name="heart.hdf5.node.connectivity_keys" sourceName="/foo/bar/connectivity_keys"/>
+    <ArrayDataSource name="heart.hdf5.node.connectivity_values" sourceName="/foo/bar/connectivity_values"/>
+  </ArrayDataResource>
 
-  <TextFileResource name="heart.coordinates.resource" xlink:href="heart.node.coordinates">
-    <TextDataSource name="heart.node.coordinates_data" firstLine="1" count="633" length="3" head="0" tail="0" />
-  </TextFileResource>
- <!-- 
-  <HDF5FileResource name="heart.hdf5.resource" xlink:href="raw_data.h5">
-    <HDF5DataSource name="heart.hdf5.node.coordinates_data">
-      <DenseArray dataset="/foo/bar/data"/>
-    </HDF5DataSource>
-    <HDF5DataSource name="heart.hdf5.node.connectivity_data">
-      <CSRArray cellData="/foo/bar/cell_data" rowDataOffsets="/foo/bar/row_data" columnIndexes="/foo/bar/column_data"/>
-    </HDF5DataSource>
-  </HDF5FileResource>
-  -->
   <EnsembleType name="heart.nodes.type">
    <Members>
     <MemberRange min="1" max="633" />
@@ -77,16 +66,14 @@
   <ArgumentEvaluator name="heart.mesh.argument" valueType="heart.mesh.type" />
 
   <ParameterEvaluator name="heart.cube.3x3x3_nodes" valueType="heart.nodes.type">
-   <Arguments>
-     <Argument name="triquadratic.node.argument" />
-     <Argument name="heart.mesh.argument" />
-   </Arguments>
-   <SemidenseData data="heart.connectivity">
+   <DOKArrayData keyData="heart.hdf5.node.connectivity_keys" valueData="heart.hdf5.node.connectivity_values">
+    <SparseIndexes>
+     <IndexEvaluator evaluator="heart.mesh.argument.elements" />
+    </SparseIndexes>
     <DenseIndexes>
      <IndexEvaluator evaluator="triquadratic.node.argument" />
-     <IndexEvaluator evaluator="heart.mesh.argument.elements" order="heart.element.data" />
     </DenseIndexes>
-   </SemidenseData>
+   </DOKArrayData>
   </ParameterEvaluator>
 
 
@@ -98,10 +85,6 @@
   
 
   <AggregateEvaluator name="heart.element_params.triquadratic_lagrange" valueType="triquadratic.parameters.type">
-   <Arguments>
-     <Argument name="heart.mesh.argument" />
-     <Argument name="heart.nodal_dofs" />
-   </Arguments>
    <Bindings>
      <BindIndex argument="triquadratic.node.argument" indexNumber="1"/>
      <Bind argument="heart.nodes.argument" source="heart.cube.3x3x3_nodes"/>
@@ -111,10 +94,6 @@
 
   
   <ReferenceEvaluator name="heart.triquadratic_lagrange" evaluator="triquadratic.interpolator" valueType="real.type">
-   <Arguments>
-     <Argument name="heart.mesh.argument" />
-     <Argument name="heart.nodal_dofs" />
-   </Arguments>
    <Bindings>
     <Bind argument="triquadratic.parameters.argument" source="heart.element_params.triquadratic_lagrange" />
     <Bind argument="xi.argument" source="heart.mesh.argument.xi" />
@@ -123,10 +102,6 @@
 
 
   <PiecewiseEvaluator name="heart.template.triquadratic" valueType="real.type">
-   <Arguments>
-     <Argument name="heart.mesh.argument" />
-     <Argument name="heart.nodal_dofs" />
-   </Arguments>
    <IndexEvaluators>
      <IndexEvaluator evaluator="heart.mesh.argument.elements" indexNumber="1" />
    </IndexEvaluators>
@@ -137,16 +112,12 @@
   <ArgumentEvaluator name="heart.rc3.component" valueType="rc3.ensemble" />
 
   <ParameterEvaluator name="heart.node.coordinates" valueType="real.type">
-   <Arguments>
-     <Argument name="heart.rc3.component" />
-     <Argument name="heart.nodes.argument" />
-   </Arguments>
-   <SemidenseData data="heart.node.coordinates_data">
+   <DenseArrayData data="heart.hdf5.node.coordinates_data">
     <DenseIndexes>
      <IndexEvaluator evaluator="heart.rc3.component" />
      <IndexEvaluator evaluator="heart.nodes.argument" />
     </DenseIndexes>
-   </SemidenseData>
+   </DenseArrayData>
   </ParameterEvaluator>
 
 
@@ -159,10 +130,6 @@
 
 
   <AggregateEvaluator name="heart.coordinates.template" valueType="rc3.type">
-   <Arguments>
-     <Argument name="heart.mesh.argument" />
-     <Argument name="heart.nodal_component_dofs" />
-   </Arguments>
    <Bindings>
      <BindIndex argument="heart.rc3.component" indexNumber="1"/>
      <Bind argument="heart.nodal_dofs" source="heart.nodal_component_dofs"/>
@@ -175,9 +142,6 @@
   </AggregateEvaluator>
   
   <ReferenceEvaluator name="heart.coordinates" evaluator="heart.coordinates.template">
-   <Arguments>
-     <Argument name="heart.mesh.argument" />
-   </Arguments>
    <Bindings>
     <Bind argument="heart.nodal_component_dofs" source="heart.node.coordinates" />
    </Bindings>
