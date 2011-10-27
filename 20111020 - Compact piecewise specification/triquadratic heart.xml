@@ -101,9 +101,9 @@
   
   <PiecewiseEvaluator name="heart.mesh.bounds" valueType="boolean">
    <IndexEvaluators>
-     <IndexEvaluator evaluator="heart.mesh.argument.elements" indexNumber="1" />
+     <IndexEvaluator evaluator="heart.constant.element_kind_1" indexNumber="1" />
    </IndexEvaluators>
-   <EvaluatorMap mapEvaluator="heart.constant.element_kind_1">
+   <EvaluatorMap>
      <EvaluatorMapEntry value="1" evaluator="shape.cube" />
    </EvaluatorMap>
   </PiecewiseEvaluator>
@@ -146,9 +146,9 @@
 
   <PiecewiseEvaluator name="heart.template.triquadratic" valueType="real.type">
    <IndexEvaluators>
-     <IndexEvaluator evaluator="heart.mesh.argument.elements" indexNumber="1" />
+     <IndexEvaluator evaluator="heart.constant.element_kind_1" indexNumber="1" />
    </IndexEvaluators>
-   <EvaluatorMap mapEvaluator="heart.constant.element_kind_1">
+   <EvaluatorMap>
      <EvaluatorMapEntry value="1" evaluator="heart.triquadratic_lagrange" />
    </EvaluatorMap>
   </PiecewiseEvaluator>
