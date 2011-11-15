@@ -10,62 +10,37 @@
       <ImportEvaluator localName="real.2d.component.argument" remoteName="real.2d.component.argument"/>
     </Import>
 
+    <!--
     <Import xlink:href="http://www.fieldml.org/resources/xml/Uncertainty1.xml" region="uncert">
       <ImportEvaluator localName="randomTag" remoteName="randomTag"/>
     </Import>
-
-    <EnsembleType name="grid.nodes.type">
-      <Members><MemberRange min="1" max="20"/></Members>
-    </EnsembleType>
-
-    <EnsembleType name="grid.realisation.type">
-      <Members><MemberRange min="1" max="100"/></Members>
-    </EnsembleType>
-
-    <ArgumentEvaluator name="grid.nodes.argument" valueType="grid.nodes.type"/>
-    <ArgumentEvaluator name="grid.x.argument" valueType="real.1d"/>
-    <ArgumentEvaluator name="grid.y.argument" valueType="real.1d"/>
-
-    <ArgumentEvaluator name="grid.realisation.argument" valueType="grid.realisation.type"/>
-    <ReferenceEvaluator name="grid.realisation.sample" evaluator="randomTag" valueType="grid.realisation.type"/>
-
-    <ParameterEvaluator name="grid.nodes.nodalPosition" valueType="real.1d">
-      <SemidenseData data="grid.nodes.locations.datasource">
-        <DenseIndexes>
-          <IndexEvaluator evaluator="real.2d.component.argument"/>
-          <IndexEvaluator evaluator="grid.nodes.argument"/>
-        </DenseIndexes>
-      </SemidenseData>
+    -->
+    <ArgumentEvaluator name="random.0d.equiprobable.argument" valueType="grid.realisation.type"/>
+    <ExternalEvaluator name="random.0d.equiprobable.tag" valueType="grid.realisation.type">
       <Arguments>
-        <Argument name="real.2d.component.argument"/>
-        <Argument name="grid.nodes.argument"/>
+        <Argument name="random.0d.equiprobable.argument"/>
       </Arguments>
-    </ParameterEvaluator>
+    </ExternalEvaluator>
 
-    <ParameterEvaluator name="grid.nodes.nodalValue" valueType="real.1d">
-      <SemidenseData data="grid.values.realisations.datasource">
-        <DenseIndexes>
-          <IndexEvaluator evaluator="grid.realisation.sample"/>
-          <IndexEvaluator evaluator="grid.nodes.argument"/>
-        </DenseIndexes>
-      </SemidenseData>
-      <Arguments>
-        <Argument name="grid.nodes.argument"/>
-      </Arguments>
-    </ParameterEvaluator>
-
-    <TextInlineResource name="grid.nodes.locations.resource">
-      <TextString>
+    <DataResource name="grid.nodes.locations.resource">
+      <DataResourceDescription>
+        <DataResourceString>
        <!-- X coords -->
 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4
        <!-- Y coords -->
 1 2 3 4 5 1 2 3 4 5 1 2 3 4 5 1 2 3 4 5
-      </TextString>
-      <TextDataSource name="grid.nodes.locations.datasource" count="1" length="40"/>
-    </TextInlineResource>
+        </DataResourceString>
+      </DataResourceDescription>
+      <ArrayDataSource name="grid.nodes.locations.datasource" location="1" rank="2">
+        <RawArraySize>
+          2 20
+        </RawArraySize>
+      </ArrayDataSource>
+    </DataResource>
 
-    <TextInlineResource name="grid.values.realisations.resource">
-      <TextString>
+    <DataResource name="grid.nodes.realisations.resource">
+      <DataResourceDescription>
+        <DataResourceString>
 10.724514 10.714881 10.327879 10.158196  9.998664 11.874681 11.919272
 11.277933 11.040370 11.136231 12.791554 12.565457 12.308052 12.224076
 12.093719 14.034830 13.596919 13.692232 13.120851 12.888418 10.172525
@@ -352,8 +327,51 @@
  7.667373 11.823627 11.043756  8.904854  8.891162 12.275355 11.034485
 10.467970 12.238359 11.238691 12.466521 12.048304 12.468083  9.552947
 13.631952 12.133213 11.878518 12.748803 14.467623
-      </TextString>
-      <TextDataSource name="grid.values.realisations.resource" count="1" length="2000"/>
-    </TextInlineResource>
+        </DataResourceString>
+      </DataResourceDescription>
+      <ArrayDataSource name="grid.nodes.realisations.datasource" location="1" rank="2">
+        <RawArraySize>
+          100 20
+        </RawArraySize>
+      </ArrayDataSource>
+    </DataResource>
+
+    <EnsembleType name="grid.nodes.type">
+      <Members><MemberRange min="1" max="20"/></Members>
+    </EnsembleType>
+
+    <EnsembleType name="grid.realisation.type">
+      <Members><MemberRange min="1" max="100"/></Members>
+    </EnsembleType>
+
+    <ArgumentEvaluator name="grid.nodes.argument" valueType="grid.nodes.type"/>
+    <ArgumentEvaluator name="grid.x.argument" valueType="real.1d"/>
+    <ArgumentEvaluator name="grid.y.argument" valueType="real.1d"/>
+
+    <ArgumentEvaluator name="grid.realisation.argument" valueType="grid.realisation.type"/>
+    <ReferenceEvaluator name="grid.realisation.sample" evaluator="random.0d.equiprobable.tag" valueType="grid.realisation.type">
+      <Bindings>
+        <Bind argument="random.0d.equiprobable.argument" source="grid.realisation.argument"/>
+      </Bindings>
+    </ReferenceEvaluator>
+
+    <ParameterEvaluator name="grid.nodes.nodalPosition" valueType="real.1d">
+      <DenseArrayData data="grid.nodes.locations.datasource">
+        <DenseIndexes>
+          <IndexEvaluator evaluator="real.2d.component.argument"/>
+          <IndexEvaluator evaluator="grid.nodes.argument"/>
+        </DenseIndexes>
+      </DenseArrayData>
+    </ParameterEvaluator>
+
+    <ParameterEvaluator name="grid.nodes.nodalValue" valueType="real.1d">
+      <DenseArrayData data="grid.nodes.realisations.datasource">
+        <DenseIndexes>
+          <IndexEvaluator evaluator="grid.realisation.sample"/>
+          <IndexEvaluator evaluator="grid.nodes.argument"/>
+        </DenseIndexes>
+      </DenseArrayData>
+    </ParameterEvaluator>
+
   </Region>
 </Fieldml>
