@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Fieldml version="0.4.0"
+    xsi:noNamespaceSchemaLocation="http://www.fieldml.org/resources/xml/0.4/FieldML_0.4.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+ <Region name="test pipe">
+
+  <DataResource name="test.pipe.resource">
+    <DataResourceDescription>
+      <DataResourceString>
+        4 5 2 1 13 14 11 10        5 6 1 3 14 15 10 12        7 9 4 5 16 18 13 14        9 8 5 6 18 17 14 15        13 14 11 10 22 23 20 19        14 15 10 12 23 24 19 21        16 18 13 14 25 27 22 23        18 17 14 15 27 26 23 24
+        0.0 1.0 1.0        -0.7 0.7 1.0        0.7 0.7 1.0        -1.0 0.0 1.0        0.0 0.0 1.0        1.0 0.0 1.0        -0.7 -0.7 1.0        0.7 -0.7 1.0        0.0 -1.0 1.0
+        0.0 1.0 0.0        -0.7 0.7 0.0        0.7 0.7 0.0        -1.0 0.0 0.0        0.0 0.0 0.0        1.0 0.0 0.0        -0.7 -0.7 0.0        0.7 -0.7 0.0        0.0 -1.0 0.0
+        0.0 1.0 -1.0        -0.7 0.7 -1.0        0.7 0.7 -1.0        -1.0 0.0 -1.0        0.0 0.0 -1.0        1.0 0.0 -1.0        -0.7 -0.7 -1.0        0.7 -0.7 -1.0        0.0 -1.0 -1.0
+      </DataResourceString>
+    </DataResourceDescription>
+    <ArrayDataSource name="test.pipe.node.connectivity_values" location="1" rank="2"/>
+    <ArrayDataSource name="test.pipe.node.coordinates_data" location="2" rank="2"/>
+  </DataResource>
+  
+  
+  <!--
+    NOTE: For illustrative purposes, this document does not use a library. Objects that are intended
+    to be in a library are prefixed with "library.".
+    
+    NOTE: Given the convenience of automatically-constructed evaluators and domains, combined with the problem
+    of ensuring that their named are unique, the foward-slash character '/' will always be used when
+    constructing the names of such evaluators, and will be illegal when naming user-constructed objects. Such
+    domains will have a 'parent' object, a handle to which will be available through the API. This will
+    make it easier for applications to manage object lifetime.
+    
+    NOTE: In order to facilitate parsing and communication, it might be a good idea to have a set of n-dimensional
+    unbounded primitive domains (and one boolean domain) as built-in objects, and forbid the user from creating
+    such objects themselves. In particular, this would mean that there would only be one '0d domain'. 
+    
+    NOTE: To avoid having to construct ad-hoc cross-domains, the term 'evaluator' is retained. A 'field' is simply
+    an evaluator with a single domain-location argument.
+    
+    NOTE: It is not clear how, if at all, invariant evaluators should be treated. Are they defined on 'no domain'?
+    If not, they must be defined on a particular 0d domain. Why/when does it matter which?
+   -->
+  
+  <!--
+    Primitive domains are bounded by an optional bounds attribute.
+    
+    If a bounds is explicitly specified, it must have a single argument compatible
+    with the domain being declared, and an associated bounds evaluator is then formed
+    as a reference evaluator referencing the given evaluator, and binding the domain's
+    argument to the given evaluator's single argument.
+    
+    If no bounds is specified, no such evaluator will be constructed, and the API will return
+    FML_INVALID_HANDLE. This is to be treated as if it was the invariant 'true'.
+    
+    A 0-dimensional domain's datatype is the empty tuple. Therefore invariant evaluators
+    can be treated as being defined on a 0d-domain.
+    
+    NOTE: Perhaps special-case 0d domains so that they don't get an associated argument evaluator?
+    
+    NOTE: Perhaps forbid direct bounds specification for primitive domains, and only allows bounded
+    domains to be expressed as explicit subdomains?
+   -->
+  <PrimitiveDomain name="library.point" dimensions="0"/>
+  
+  <!--
+    NOTE: Although boolean domains could be constructed as a two-element ensemble, this seems too cute. 
+   -->
+  <BooleanDomain name="library.boolean"/>
+  
+  <!--
+    Domain declarations implictly construct an associated argument evaluator.
+    
+    EnsembleDomains implicitly construct an associated ensemble used exclusively for
+    disambiguating its constituent subdomains. Therefore, for such ensembles, there is
+    a unique domain which uses values of that ensemble as a subdomain index.
+    
+    EnsembleDomains implicitly construct an associated bounds evaluator. This evaluator
+    is a boolean-valued piecewise indexed by the domain's element ensemble argument,
+    which delegates to the corresponding subdomain's bounds. 
+    
+    The resulting datatype is a tuple of a value of the domain's ensemble and a datatype
+    capable of represent a location in any of the subdomains. For inhomogeneous unions,
+    this datatype may be nontrivial.
+    
+    NOTE: In the case of a 0d ensemble domain, it doesn't seem that the choice of 'base' domain/s
+    being used is relevant. Perhaps allow the domain specifiers to be omitted in such cases?
+   -->
+  <EnsembleDomain name="test.pipe.nodes" dimensions="0">
+   <Members>
+    <MemberRange min="1" max="27">
+      <Domain name="library.point"/>
+    </MemberRange>
+   </Members>
+  </EnsembleDomain>
+
+  <EnsembleDomain name="test.pipe.external.nodes" dimensions="0">
+   <Members>
+    <MemberRange min="1" max="18">
+      <Domain name="library.point"/>
+    </MemberRange>
+   </Members>
+  </EnsembleDomain>
+
+  <EnsembleDomain name="library.trilinear.nodes" dimensions="0">
+   <Members>
+    <MemberRange min="1" max="8">
+      <Domain name="library.point"/>
+    </MemberRange>
+   </Members>
+  </EnsembleDomain>
+
+  <!--
+    1d primitive domains have a real-scalar datatype. They have one component, but do not have an indexing ensemble.
+    Users wishing to express a 'single-component vector' should construct a cross-product with
+    a single factor.
+   -->
+  <PrimitiveDomain name="library.real_1" dimensions="1" />
+  
+  <!--
+    Multidimensional primitive domains have a real-vector datatype. An associated n-element indexing ensemble
+    is created, as well as a corresponding argument evaluator for that index.
+   -->
+  <PrimitiveDomain name="library.real_3" dimensions="3" />
+
+  <ExternalEvaluator name="library.shape.unit.cube" valueDomain="library.boolean">
+    <Arguments>
+      <Argument name="library.real_3/location"/>
+    </Arguments>
+  </ExternalEvaluator>
+  
+  
+  <!--
+    The bounds is specified via an XML element, rather than an attribute, so that the author can partially apply more
+    complicated evaluators. The result, however, must have a single unbound argument that is compatible with the
+    domain's own argument evaluator. 
+   -->
+  <PrimitiveDomain name="library.chart.unit.cube" dimensions="3">
+    <Bounds evaluator="library.shape.unit.cube" />
+  </PrimitiveDomain>
+
+  <!--
+    Subdomains are specified by a boolean-valued evaluator and a superdomain.
+    
+    Subdomains implicitly construct an associated bounds evaluator. This evaluator
+    is a logical AND applied to the superdomain's bounds and the given qualifier.
+    
+    Subdomains implicitly construct an associated embed. This embeds the given subdomain into
+    its superdomain using a nominal identity evaluator.
+    
+    NOTE: This is redeclaration of library.chart.unit.cube illustrating a synonym problem. This can largely be
+    avoided if instead of specifically looking for a bounded primitive domain, the calling app asks about the
+    bounds, dimensionality and composition. That is, rather than examing the construction of the domain, apps
+    should examine the properties. 
+    
+    NOTE: Allow the bounds evaluator to be explicitly associated with a particular subdomain of the given superdomain?
+    
+    NOTE: To facilitate parsing, should subdomains inherit all properties except name and bounds from its parent?
+   -->  
+  <SubDomain name="library.chart.unit.cube" superdomain="library.real_3">
+    <SubdomainBounds evaluator="library.shape.unit.cube" />
+  </SubDomain>
+  
+  <PrimitiveDomain name="library.trilinear.parameters" dimensions="8" />
+
+  <!--
+    Ensemble domains may express connectivity via a chart, direct or indirect connectivity.
+    
+    Direct connectivity expresses connectivity by specifying a map to another domain. The map will typically
+    be a piecewise evaluator.
+    
+    Chart connectivity is a particular type of direct connectivity in which the target domain is a primitive domain.
+    Although there can be multiple direct connectivity statements, there can be no more than one chart connectivity,
+    and it represents a much stronger statement.
+    
+    Indirect connectivity is defined in terms of lower-dimension domains via intermediary domains.
+   -->
+  <EnsembleDomain name="test.pipe.mesh" dimensions="3">
+   <Members>
+     <MemberRange min="1" max="8">
+       <Domain name="library.chart.unit.cube"/>
+     </MemberRange>
+   </Members>
+   <ChartConnectivity domain="library.chart.unit.cube" map="test.pipe.mesh_to_unit_cube"/>
+   <IndirectConnectivity domain="test.pipe.nodes">
+     <DomainConnectivity subdomain="library.trilinear.nodes" evaluator="test.pipe.cube.2x2x2_nodes"/>
+   </IndirectConnectivity>
+  </EnsembleDomain>
+
+  <ParameterEvaluator name="test.pipe.cube.2x2x2_nodes" valueDomain="test.pipe.nodes">
+   <DenseArrayData data="test.pipe.node.connectivity_values">
+    <DenseIndexes>
+     <IndexEvaluator evaluator="test.pipe.mesh/location/element" />
+     <IndexEvaluator evaluator="library.trilinear.nodes/location" />
+    </DenseIndexes>
+   </DenseArrayData>
+  </ParameterEvaluator>
+  
+  <!--
+    Evaluators that delegate to an argument evaluator with arguments do not inherit those arguments, however
+    when a source is bound to the argument evaluator, any arguments not shared by the source must also be bound
+    at the same scope. The result is analogous to a partially-applied function.
+
+    Conversely, binds for an argument evaluator's arguments are ignored except at scopes where the argument evaluator
+    is being delegated to, or used as a source itself (and the corresponding argument does not share the argument).
+   -->
+  <ArgumentEvaluator name="test.pipe.nodal_dofs" valueDomain="library.real_1">
+   <Arguments>
+     <Argument name="test.pipe.nodes/location" />
+   </Arguments>
+  </ArgumentEvaluator>
+
+  <AggregateEvaluator name="test.pipe.element_params.trilinear_lagrange" valueDomain="trilinear.parameters">
+   <Bindings>
+     <Bind argument="test.pipe.nodes/location" source="test.pipe.cube.2x2x2_nodes"/>
+     <BindIndex argument="library.trilinear.nodes/location" indexNumber="1"/>
+   </Bindings>
+   <ComponentEvaluators default="test.pipe.nodal_dofs" />
+  </AggregateEvaluator>
+  
+  <ExternalEvaluator name="library.trilinear.interpolator" valueType="library.real_1">
+    <Arguments>
+      <Argument name="trilinear.parameters/location"/>
+      <Argument name="library.chart.unit.cube/location"/>
+    </Arguments>
+  </ExternalEvaluator>
+  
+  <ReferenceEvaluator name="test.pipe.trilinear_lagrange" evaluator="library.trilinear.interpolator" valueDomain="library.real_1">
+   <Bindings>
+    <Bind argument="trilinear.parameters/location" source="test.pipe.element_params.trilinear_lagrange" />
+    <Bind argument="library.chart.unit.cube/location" source="test.pipe.mesh/location/xi" />
+   </Bindings>
+  </ReferenceEvaluator>
+
+  <PiecewiseEvaluator name="test.pipe.template.trilinear" valueDomain="library.real_1">
+   <IndexEvaluators>
+     <IndexEvaluator evaluator="test.pipe.mesh/location/element" indexNumber="1" />
+   </IndexEvaluators>
+   <EvaluatorMap defaultEvaluator="test.pipe.trilinear_lagrange" />
+  </PiecewiseEvaluator>
+  
+  <PrimitiveDomain name="library.rc3" dimensions="3" />
+
+  <ParameterEvaluator name="test.pipe.node.coordinates" valueDomain="library.real_1">
+   <DenseArrayData data="test.pipe.node.coordinates_data">
+    <DenseIndexes>
+     <IndexEvaluator evaluator="library.rc3/component/argument" />
+     <IndexEvaluator evaluator="test.pipe.nodes/location" />
+    </DenseIndexes>
+   </DenseArrayData>
+  </ParameterEvaluator>
+
+  <ArgumentEvaluator name="test.pipe.nodal_component_dofs" valueDomain="library.real_1">
+   <Arguments>
+     <Argument name="test.pipe.nodes/location" />
+     <Argument name="library.rc3/component/argument" />
+   </Arguments>
+  </ArgumentEvaluator>
+
+  <AggregateEvaluator name="test.pipe.coordinates.template" valueDomain="library.rc3">
+   <Bindings>
+     <BindIndex argument="library.rc3/component/argument" indexNumber="1"/>
+     <Bind argument="test.pipe.nodal_dofs" source="test.pipe.nodal_component_dofs"/>
+   </Bindings>
+   <ComponentEvaluators>
+    <ComponentEvaluator component="1" evaluator="test.pipe.template.trilinear" />
+    <ComponentEvaluator component="2" evaluator="test.pipe.template.trilinear" />
+    <ComponentEvaluator component="3" evaluator="test.pipe.template.trilinear" />
+   </ComponentEvaluators>
+  </AggregateEvaluator>
+  
+  <ReferenceEvaluator name="test.pipe.coordinates" evaluator="test.pipe.coordinates.template">
+   <Bindings>
+    <Bind argument="test.pipe.nodal_component_dofs" source="test.pipe.node.coordinates" />
+   </Bindings>
+  </ReferenceEvaluator>
+  
+  <Field name="test.pipe.coordinates.field" domain="test.pipe.mesh">
+    <Evaluator name="test.pipe.coordinates" domainArgument="test.pipe.mesh/location"/>
+  </Field>
+
+ </Region>
+</Fieldml>
